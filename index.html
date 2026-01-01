@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2026 | Special Edition for Boudi</title>
+    <title>2026 | Boudi Edition</title>
     <style>
         :root {
-            --accent: #ffd700; /* Gold accent for a premium feel */
-            --secondary: #ff758c; /* Warm pink/rose */
+            --accent: #00f2fe;
+            --secondary: #4facfe;
             --bg: #0b0d17;
-            --card-bg: rgba(30, 20, 40, 0.8);
+            --card-bg: rgba(20, 24, 40, 0.8);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -17,8 +17,8 @@
         body {
             background-color: var(--bg);
             background-image: 
-                radial-gradient(at 0% 0%, rgba(255, 117, 140, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(255, 215, 0, 0.1) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(79, 172, 254, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0, 242, 254, 0.15) 0px, transparent 50%);
             height: 100vh;
             color: white;
             display: flex;
@@ -49,12 +49,12 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        h1 { font-size: 1.8rem; margin-bottom: 15px; letter-spacing: -0.5px; color: var(--accent); }
-        p { color: #d1d1e0; line-height: 1.6; margin-bottom: 25px; font-size: 1rem; }
+        h1 { font-size: 2rem; margin-bottom: 15px; letter-spacing: -1px; }
+        p { color: #a0a0ba; line-height: 1.6; margin-bottom: 25px; font-size: 1rem; }
 
         .btn {
-            background: linear-gradient(135deg, var(--secondary), #ff7eb3);
-            color: #fff;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            color: #000;
             border: none;
             padding: 16px 32px;
             border-radius: 16px;
@@ -63,7 +63,6 @@
             width: 100%;
             transition: 0.3s;
             font-size: 1rem;
-            box-shadow: 0 4px 15px rgba(255, 117, 140, 0.3);
         }
 
         .btn:active { transform: scale(0.98); }
@@ -77,7 +76,6 @@
             overflow: hidden;
             background: #1a1a2e;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            border: 2px solid rgba(255, 215, 0, 0.2);
         }
 
         #scratch-canvas {
@@ -97,17 +95,121 @@
             min-height: 60px;
             color: var(--accent);
             font-style: italic;
-            font-size: 1rem;
+            font-size: 0.95rem;
             margin: 15px 0;
             padding: 0 10px;
-            font-weight: 500;
         }
 
-        .counter { color: #8a8aa3; font-size: 0.8rem; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .counter { color: #5c5c70; font-size: 0.8rem; margin-top: 10px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
+    <div id="scr-1" class="container screen active">
+        <h1>Dearest Boudi! ✨</h1>
+        <p>2025 was special because of you. Thank you for being the heart of our family. I've saved some special thoughts for you here.</p>
+        <button class="btn" onclick="goToScreen(2)">Open Memories</button>
+    </div>
+
+    <div id="scr-2" class="container screen">
+        <h2 id="mem-title" style="margin-bottom:15px;">Memory 1</h2>
+        <div class="scratch-outer">
+            <img src="" id="photo-reveal" class="hidden-img">
+            <canvas id="scratch-canvas"></canvas>
+        </div>
+        <div id="msg-reveal" class="emotion-text">Scratch the silver to reveal...</div>
+        <div id="progress" class="counter">1 OF 6</div>
+        <button id="next-btn" class="btn" style="display:none; margin-top:15px;" onclick="handleNext()">Next Memory →</button>
+    </div>
+
+    <div id="scr-3" class="container screen">
+        <h1>Happy 2026! 🥂</h1>
+        <p>May this new year bring you as much joy as you bring to everyone around you. You are more than a Boudi—you're a true friend.</p>
+        <p style="color: var(--accent); font-weight: bold;">Have a wonderful year ahead!</p>
+        <button class="btn" style="margin-top:20px" onclick="location.reload()">View Again</button>
+    </div>
+
+    <script>
+        const memories = [
+            { img: "https://picsum.photos/400/500?random=21", txt: "Thank you for always supporting me like a big sister. ❤️" },
+            { img: "https://picsum.photos/400/500?random=22", txt: "Our home is brighter and happier because you are in it! 🏠✨" },
+            { img: "https://picsum.photos/400/500?random=23", txt: "To the best cook and the best listener in the family. 🥘" },
+            { img: "https://picsum.photos/400/500?random=24", txt: "Wishing you a 2026 filled with love, health, and laughter. 🌸" },
+            { img: "https://picsum.photos/400/500?random=25", txt: "Thanks for always taking my side when I'm in trouble! 😉" },
+            { img: "https://picsum.photos/400/500?random=26", txt: "Cheers to another year of making great memories together! 🥂" }
+        ];
+
+        let index = 0;
+        let isScratched = false;
+        const canvas = document.getElementById('scratch-canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+        function goToScreen(num) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('scr-' + num).classList.add('active');
+            if(num === 2) {
+                setTimeout(setupScratch, 100);
+            }
+        }
+
+        function setupScratch() {
+            const data = memories[index];
+            document.getElementById('photo-reveal').src = data.img;
+            document.getElementById('mem-title').innerText = `Memory ${index + 1}`;
+            document.getElementById('msg-reveal').innerText = "Scratch the silver to reveal...";
+            document.getElementById('progress').innerText = `${index + 1} OF ${memories.length}`;
+            document.getElementById('next-btn').style.display = 'none';
+            isScratched = false;
+
+            canvas.width = 280;
+            canvas.height = 350;
+
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.fillStyle = '#c0c0c0'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#999';
+            for(let i=0; i<400; i++) {
+                ctx.fillRect(Math.random()*280, Math.random()*350, 1, 1);
+            }
+        }
+
+        function handleScratch(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const pt = e.touches ? e.touches[0] : e;
+            const x = (pt.clientX - rect.left) * (canvas.width / rect.width);
+            const y = (pt.clientY - rect.top) * (canvas.height / rect.height);
+
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 35, 0, Math.PI * 2);
+            ctx.fill();
+
+            if(!isScratched) {
+                isScratched = true;
+                document.getElementById('msg-reveal').innerText = memories[index].txt;
+                document.getElementById('next-btn').style.display = 'block';
+            }
+        }
+
+        function handleNext() {
+            index++;
+            if(index < memories.length) {
+                setupScratch();
+            } else {
+                goToScreen(3);
+            }
+        }
+
+        canvas.addEventListener('mousemove', (e) => { if(e.buttons === 1) handleScratch(e); });
+        canvas.addEventListener('mousedown', handleScratch);
+        canvas.addEventListener('touchmove', handleScratch, { passive: false });
+        canvas.addEventListener('touchstart', handleScratch, { passive: false });
+
+    </script>
+</body>
+</html>
     <div id="scr-1" class="container screen active">
         <h1>Dearest Boudi! ✨</h1>
         <p>2025 was brighter because you're part of our family. I've gathered some special messages for you behind these cards.</p>
